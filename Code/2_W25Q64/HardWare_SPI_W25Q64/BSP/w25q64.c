@@ -124,6 +124,9 @@ static void W25Q64_Wait_Busy(void)
 
 /**
  * @brief   读取Flash数据函数
+ * @param buffer    读出数据
+ * @param addr      起始读出地址
+ * @param bytes     读出字节数
  */
 int W25Q64_ReadFlash(uint8_t *buffer, uint32_t addr, uint16_t bytes)
 {
