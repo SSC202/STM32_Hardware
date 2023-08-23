@@ -49,7 +49,7 @@
 #define DI_STATE() HAL_GPIO_ReadPin(W25Q64_DI_Port, W25Q64_DI_Pin)
 
 /**
- * @brief   微妙延时函数
+ * @brief   微秒延时函数
  */
 static void delay_us(__IO uint32_t count)
 {
