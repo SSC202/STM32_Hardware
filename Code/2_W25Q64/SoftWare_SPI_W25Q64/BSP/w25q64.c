@@ -14,7 +14,7 @@
 
 /* 如果使能硬件SPI */
 #ifdef HardWare_SPI
-
+#include "spi.h"
 #endif
 /****************************************************/
 /* SPI基础驱动函数 */
@@ -133,7 +133,6 @@ static HAL_StatusTypeDef W25Q64_SPI_Receive(uint8_t *rev_buf, uint16_t size)
 #endif
 /* 如果使能硬件SPI */
 #ifdef HardWare_SPI
-#include "spi.h"
 /**
  * @brief   SPI发送函数
  * @param   send_buf    发送缓冲区地址
