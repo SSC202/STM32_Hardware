@@ -4,9 +4,9 @@
 #include "stm32f1xx.h"
 /****************配置选择*********************/
 /* 是否使能硬件IIC */
-#define EEPROM_IIC_HardWare
+//#define EEPROM_IIC_HardWare
 /* 是否使能软件IIC */
-// #define EEPROM_IIC_SoftWare
+#define EEPROM_IIC_SoftWare
 /* 是否使用FreeRTOS */
 // #define USE_FREERTOS
 /****************芯片定义*********************/
