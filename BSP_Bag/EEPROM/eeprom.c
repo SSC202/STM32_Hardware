@@ -14,11 +14,6 @@
 /* 读写控制定义 */
 #define IIC_WR 0 /* 写控制bit */
 #define IIC_RD 1 /* 读控制bit */
-/* 端口定义 */
-#define IIC_SCL_Port GPIOB
-#define IIC_SDA_Port GPIOB
-#define IIC_SCL_Pin  GPIO_PIN_6
-#define IIC_SDA_Pin  GPIO_PIN_7
 /* 端口状态定义 */
 #define IIC_SCL(x)                                                                                                                            \
     do {                                                                                                                                      \

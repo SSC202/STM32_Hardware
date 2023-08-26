@@ -12,7 +12,13 @@
 /****************芯片定义*********************/
 #define EEPROM_ADDR_Write 0xA0 // 写地址
 #define EEPROM_ADDR_Read  0xA1 // 读地址
-
+/****************端口定义*********************/
+#ifdef EEPROM_IIC_SoftWare
+#define IIC_SCL_Port GPIOB
+#define IIC_SDA_Port GPIOB
+#define IIC_SCL_Pin  GPIO_PIN_6
+#define IIC_SDA_Pin  GPIO_PIN_7
+#endif
 /****************函数定义*********************/
 void EEPROM_Read(uint8_t addr, uint8_t *rev_buf, uint16_t size);
 void EEPROM_Write(uint8_t addr, uint8_t *send_buf, uint16_t size);
