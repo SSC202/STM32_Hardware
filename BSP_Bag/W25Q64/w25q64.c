@@ -20,13 +20,6 @@
 /* SPI基础驱动函数 */
 /* 如果使能软件SPI */
 #ifdef SoftWare_SPI
-/* 引脚定义 */
-#define W25Q64_DI_Port  GPIOA
-#define W25Q64_DI_Pin   GPIO_PIN_6
-#define W25Q64_DO_Port  GPIOA
-#define W25Q64_DO_Pin   GPIO_PIN_7
-#define W25Q64_SCL_Port GPIOA
-#define W25Q64_SCL_Pin  GPIO_PIN_5
 /* 引脚状态宏定义 */
 #define DO_H()                                                          \
     do {                                                                \

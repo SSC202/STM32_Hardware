@@ -36,6 +36,15 @@
 
 #define W25Q64_PAGE_PROG_CMD            0x02 // 页写入
 #define W25Q64_QUAD_INPUT_PAGE_PROG_CMD 0x32
+/************************* 引脚定义 ********************************/
+#ifdef SoftWare_SPI
+#define W25Q64_DI_Port  GPIOA
+#define W25Q64_DI_Pin   GPIO_PIN_6
+#define W25Q64_DO_Port  GPIOA
+#define W25Q64_DO_Pin   GPIO_PIN_7
+#define W25Q64_SCL_Port GPIOA
+#define W25Q64_SCL_Pin  GPIO_PIN_5
+#endif
 /************************* 函数声明 ********************************/
 uint16_t W25Q64_ReadID(void);
 int W25Q64_ReadFlash(uint8_t *buffer, uint32_t addr, uint16_t bytes);
