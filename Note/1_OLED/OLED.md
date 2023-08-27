@@ -253,3 +253,284 @@ void OLED_Init(void)
 }
 ```
 
+## 4. u8g2 图形库
+
+https://github.com/olikraus/u8g2
+
+u8g2 是一个用于嵌入式设备的单色图形库。u8g2支持单色 OLED 和 LCD，并支持如 SSD1306等多种类型的 OLED 驱动。
+
+### 源码移植
+
+关注 csrc 里面的文件。
+
+#### 去掉无用的驱动文件
+
+这些驱动文件通常是`u8x8_d_xxx.c`，xxx包括驱动的型号和屏幕分辨率。
+
+> SSD1306 驱动芯片的 OLED，使用u8x8_ssd1306_128x64_noname.c这个文件，其它的屏幕驱动和分辨率的文件可以删掉。
+
+#### 精简u8g2_d_setup.c
+
+对于IIC接口，使用`u8g2_Setup_ssd1306_i2c_128x64_noname_f`函数；
+
+对于SPI接口，使用`u8g2_Setup_ssd1306_128x64_noname_f`函数。
+
+#### 精简u8g2_d_memory.c
+
+由于用到的`u8g2_Setup_ssd1306_i2c_128x64_noname_f`和`u8g2_Setup_ssd1306_128x64_noname_f`函数中，只调用了`u8g2_m_16_8_f`这个函数，所以仅留下这个函数。
+
+### 使用源码
+
+### GPIO 初始化
+
+用`#define`对 OLED 用到的 IIC/SPI 接口进行GPIO的初始化配置；
+
+### 回调函数添加
+
+回调函数模板如下：
+
+```c
+uint8_t u8x8_gpio_and_delay_template(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr)
+{
+  switch(msg)
+  {
+    case U8X8_MSG_GPIO_AND_DELAY_INIT:	// called once during init phase of u8g2/u8x8
+      break;							// can be used to setup pins
+    case U8X8_MSG_DELAY_NANO:			// delay arg_int * 1 nano second
+      break;    
+    case U8X8_MSG_DELAY_100NANO:		// delay arg_int * 100 nano seconds
+      break;
+    case U8X8_MSG_DELAY_10MICRO:		// delay arg_int * 10 micro seconds
+      break;
+    case U8X8_MSG_DELAY_MILLI:			// delay arg_int * 1 milli second
+      break;
+    case U8X8_MSG_DELAY_I2C:				// arg_int is the I2C speed in 100KHz, e.g. 4 = 400 KHz
+      break;							// arg_int=1: delay by 5us, arg_int = 4: delay by 1.25us
+    case U8X8_MSG_GPIO_D0:				// D0 or SPI clock pin: Output level in arg_int
+    //case U8X8_MSG_GPIO_SPI_CLOCK:
+      break;
+    case U8X8_MSG_GPIO_D1:				// D1 or SPI data pin: Output level in arg_int
+    //case U8X8_MSG_GPIO_SPI_DATA:
+      break;
+    case U8X8_MSG_GPIO_D2:				// D2 pin: Output level in arg_int
+      break;
+    case U8X8_MSG_GPIO_D3:				// D3 pin: Output level in arg_int
+      break;
+    case U8X8_MSG_GPIO_D4:				// D4 pin: Output level in arg_int
+      break;
+    case U8X8_MSG_GPIO_D5:				// D5 pin: Output level in arg_int
+      break;
+    case U8X8_MSG_GPIO_D6:				// D6 pin: Output level in arg_int
+      break;
+    case U8X8_MSG_GPIO_D7:				// D7 pin: Output level in arg_int
+      break;
+    case U8X8_MSG_GPIO_E:				// E/WR pin: Output level in arg_int
+      break;
+    case U8X8_MSG_GPIO_CS:				// CS (chip select) pin: Output level in arg_int
+      break;
+    case U8X8_MSG_GPIO_DC:				// DC (data/cmd, A0, register select) pin: Output level in arg_int
+      break;
+    case U8X8_MSG_GPIO_RESET:			// Reset pin: Output level in arg_int
+      break;
+    case U8X8_MSG_GPIO_CS1:				// CS1 (chip select) pin: Output level in arg_int
+      break;
+    case U8X8_MSG_GPIO_CS2:				// CS2 (chip select) pin: Output level in arg_int
+      break;
+    case U8X8_MSG_GPIO_I2C_CLOCK:		// arg_int=0: Output low at I2C clock pin
+      break;							// arg_int=1: Input dir with pullup high for I2C clock pin
+    case U8X8_MSG_GPIO_I2C_DATA:			// arg_int=0: Output low at I2C data pin
+      break;							// arg_int=1: Input dir with pullup high for I2C data pin
+    case U8X8_MSG_GPIO_MENU_SELECT:
+      u8x8_SetGPIOResult(u8x8, /* get menu select pin state */ 0);
+      break;
+    case U8X8_MSG_GPIO_MENU_NEXT:
+      u8x8_SetGPIOResult(u8x8, /* get menu next pin state */ 0);
+      break;
+    case U8X8_MSG_GPIO_MENU_PREV:
+      u8x8_SetGPIOResult(u8x8, /* get menu prev pin state */ 0);
+      break;
+    case U8X8_MSG_GPIO_MENU_HOME:
+      u8x8_SetGPIOResult(u8x8, /* get menu home pin state */ 0);
+      break;
+    default:
+      u8x8_SetGPIOResult(u8x8, 1);			// default return value
+      break;
+  }
+  return 1;
+}
+```
+
+IIC / SPI 分别使用如下：
+
+```c
+/* 如果使用软件SPI */
+#ifdef SoftWare_SPI
+uint8_t u8g2_gpio_and_delay_stm32(U8X8_UNUSED u8x8_t *u8x8, U8X8_UNUSED uint8_t msg, U8X8_UNUSED uint8_t arg_int, U8X8_UNUSED void *arg_ptr)
+{
+    switch (msg) {
+        // Initialize SPI peripheral
+        case U8X8_MSG_GPIO_AND_DELAY_INIT:
+            /* HAL initialization contains all what we need so we can skip this part. */
+            break;
+
+            // Function which implements a delay, arg_int contains the amount of ms
+        case U8X8_MSG_DELAY_MILLI:
+            HAL_Delay(arg_int);
+            break;
+            // Function which delays 10us
+        case U8X8_MSG_DELAY_10MICRO:
+            delay_us(&delay_htim, 10);
+            break;
+            // Function which delays 100ns
+        case U8X8_MSG_DELAY_100NANO:
+            __NOP();
+            break;
+            // Function to define the logic level of the clockline
+        case U8X8_MSG_GPIO_SPI_CLOCK:
+            if (arg_int)
+                HAL_GPIO_WritePin(SCL_GPIO_Port, SCL_GPIO_Pin, GPIO_PIN_SET);
+            else
+                HAL_GPIO_WritePin(SCL_GPIO_Port, SCL_GPIO_Pin, GPIO_PIN_RESET);
+
+            break;
+            // Function to define the logic level of the data line to the display
+        case U8X8_MSG_GPIO_SPI_DATA:
+            if (arg_int)
+                HAL_GPIO_WritePin(SDA_GPIO_Port, SDA_GPIO_Pin, GPIO_PIN_SET);
+            else
+                HAL_GPIO_WritePin(SDA_GPIO_Port, SDA_GPIO_Pin, GPIO_PIN_RESET);
+
+            break;
+            // Function to define the logic level of the CS line
+        case U8X8_MSG_GPIO_CS:
+            if (arg_int)
+                HAL_GPIO_WritePin(CS_GPIO_Port, CS_GPIO_Pin, GPIO_PIN_SET);
+            else
+                HAL_GPIO_WritePin(CS_GPIO_Port, CS_GPIO_Pin, GPIO_PIN_RESET);
+
+            break;
+            // Function to define the logic level of the Data/ Command line
+        case U8X8_MSG_GPIO_DC:
+            if (arg_int)
+                HAL_GPIO_WritePin(DC_GPIO_Port, DC_GPIO_Pin, GPIO_PIN_SET);
+            else
+                HAL_GPIO_WritePin(DC_GPIO_Port, DC_GPIO_Pin, GPIO_PIN_RESET);
+
+            break;
+            // Function to define the logic level of the RESET line
+        case U8X8_MSG_GPIO_RESET:
+            if (arg_int)
+                HAL_GPIO_WritePin(RST_GPIO_Port, RST_GPIO_Pin, GPIO_PIN_SET);
+            else
+                HAL_GPIO_WritePin(RST_GPIO_Port, RST_GPIO_Pin, GPIO_PIN_RESET);
+
+            break;
+        default:
+            return 0; // A message was received which is not implemented, return 0 to indicate an error
+    }
+
+    return 1; // command processed successfully.
+}
+#endif
+/* 如果使用软件IIC */
+#ifdef SoftWare_IIC
+uint8_t u8g2_gpio_and_delay_stm32(U8X8_UNUSED u8x8_t *u8x8, U8X8_UNUSED uint8_t msg, U8X8_UNUSED uint8_t arg_int, U8X8_UNUSED void *arg_ptr)
+{
+    switch (msg) {
+        case U8X8_MSG_DELAY_100NANO: // delay arg_int * 100 nano seconds
+            __NOP();
+            break;
+        case U8X8_MSG_DELAY_10MICRO: // delay arg_int * 10 micro seconds
+            delay_us(&delay_htim, 10);
+            break;
+        case U8X8_MSG_DELAY_MILLI: // delay arg_int * 1 milli second
+            HAL_Delay(1);
+            break;
+        case U8X8_MSG_DELAY_I2C: // arg_int is the I2C speed in 100KHz, e.g. 4 = 400 KHz
+            delay_us(&delay_htim, 5);
+            break;                    // arg_int=1: delay by 5us, arg_int = 4: delay by 1.25us
+        case U8X8_MSG_GPIO_I2C_CLOCK: // arg_int=0: Output low at I2C clock pin
+            if (arg_int == 1)         // arg_int=1: Input dir with pullup high for I2C clock pin
+                HAL_GPIO_WritePin(SCL_GPIO_Port, SCL_GPIO_Pin, GPIO_PIN_SET);
+            else if (arg_int == 0)
+                HAL_GPIO_WritePin(SCL_GPIO_Port, SCL_GPIO_Pin, GPIO_PIN_RESET);
+            break;
+        case U8X8_MSG_GPIO_I2C_DATA: // arg_int=0: Output low at I2C data pin
+            if (arg_int == 1)        // arg_int=1: Input dir with pullup high for I2C data pin
+                HAL_GPIO_WritePin(SDA_GPIO_Port, SDA_GPIO_Pin, GPIO_PIN_SET);
+            else if (arg_int == 0)
+                HAL_GPIO_WritePin(SDA_GPIO_Port, SDA_GPIO_Pin, GPIO_PIN_RESET);
+            break;
+        case U8X8_MSG_GPIO_MENU_SELECT:
+            u8x8_SetGPIOResult(u8x8, /* get menu select pin state */ 0);
+            break;
+        case U8X8_MSG_GPIO_MENU_NEXT:
+            u8x8_SetGPIOResult(u8x8, /* get menu next pin state */ 0);
+            break;
+        case U8X8_MSG_GPIO_MENU_PREV:
+            u8x8_SetGPIOResult(u8x8, /* get menu prev pin state */ 0);
+            break;
+        case U8X8_MSG_GPIO_MENU_HOME:
+            u8x8_SetGPIOResult(u8x8, /* get menu home pin state */ 0);
+            break;
+        default:
+            u8x8_SetGPIOResult(u8x8, 1); // default return value
+            break;
+    }
+    return 1;
+}
+#endif
+```
+
+其中微秒延时函数可以使用定时器进行延时。
+
+### 初始化
+
+```c
+void OLED_Init(u8g2_t *_u8g2)
+{
+#ifdef SoftWare_SPI
+    u8g2_Setup_ssd1306_128x64_noname_f(_u8g2, U8G2_R0, u8x8_byte_4wire_sw_spi, u8g2_gpio_and_delay_stm32);
+#endif
+#ifdef SoftWare_IIC
+    u8g2_Setup_ssd1306_i2c_128x64_noname_f(_u8g2, U8G2_R0, u8x8_byte_sw_i2c, u8g2_gpio_and_delay_stm32);
+#endif
+    u8g2_InitDisplay(_u8g2); // send init sequence to the display, display is in sleep mode after this,
+    HAL_Delay(10);
+    u8g2_SetPowerSave(_u8g2, 0); // wake up display
+    u8g2_ClearBuffer(_u8g2);
+    HAL_Delay(100);
+}
+```
+
+### 使用绘图函数
+
+```c
+void draw(u8g2_t *u8g2)
+{
+    u8g2_SetFontMode(u8g2, 1);              /*字体模式选择*/
+    u8g2_SetFontDirection(u8g2, 0);         /*字体方向选择*/
+    u8g2_SetFont(u8g2, u8g2_font_inb24_mf); /*字库选择*/
+    u8g2_DrawStr(u8g2, 0, 20, "U");
+
+    u8g2_SetFontDirection(u8g2, 1);
+    u8g2_SetFont(u8g2, u8g2_font_inb30_mn);
+    u8g2_DrawStr(u8g2, 21, 8, "8");
+
+    u8g2_SetFontDirection(u8g2, 0);
+    u8g2_SetFont(u8g2, u8g2_font_inb24_mf);
+    u8g2_DrawStr(u8g2, 51, 30, "g");
+    u8g2_DrawStr(u8g2, 67, 30, "\xb2");
+
+    u8g2_DrawHLine(u8g2, 2, 35, 47);
+    u8g2_DrawHLine(u8g2, 3, 36, 47);
+    u8g2_DrawVLine(u8g2, 45, 32, 12);
+    u8g2_DrawVLine(u8g2, 46, 33, 12);
+
+    u8g2_SetFont(u8g2, u8g2_font_4x6_tr);
+    u8g2_DrawStr(u8g2, 1, 54, "github.com/olikraus/u8g2");
+
+    u8g2_SendBuffer(u8g2);
+}
+```
+
