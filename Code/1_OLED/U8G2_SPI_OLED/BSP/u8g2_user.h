@@ -7,8 +7,8 @@
 #include "delay_us.h"
 
 /**********************驱动方式选择************************/
-#define SoftWare_SPI    //软件SPI
-//#define SoftWare_IIC    //软件IIC
+//#define SoftWare_SPI    //软件SPI
+#define SoftWare_IIC    //软件IIC
 /************************引脚定义*************************/
 #ifdef SoftWare_SPI
 #define SCL_GPIO_Port GPIOB

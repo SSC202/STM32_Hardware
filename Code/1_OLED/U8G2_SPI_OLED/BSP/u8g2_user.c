@@ -125,7 +125,7 @@ void OLED_Init(u8g2_t *_u8g2)
     u8g2_Setup_ssd1306_128x64_noname_f(_u8g2, U8G2_R0, u8x8_byte_4wire_sw_spi, u8g2_gpio_and_delay_stm32);
 #endif
 #ifdef SoftWare_IIC
-    u8g2_Setup_ssd1306_128x64_noname_f(_u8g2, U8G2_R0, u8x8_byte_sw_i2c, u8g2_gpio_and_delay_stm32);
+    u8g2_Setup_ssd1306_i2c_128x64_noname_f(_u8g2, U8G2_R0, u8x8_byte_sw_i2c, u8g2_gpio_and_delay_stm32);
 #endif
     u8g2_InitDisplay(_u8g2); // send init sequence to the display, display is in sleep mode after this,
     HAL_Delay(10);
