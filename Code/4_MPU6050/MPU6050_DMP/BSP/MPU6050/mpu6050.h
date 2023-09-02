@@ -1,8 +1,15 @@
 #ifndef __MPU6050_H
 #define __MPU6050_H
+
+
 /************************ 数据处理方式选择 *****************************/
 #define MPU_DMP             // 使用DMP库 
 #define MPU_Kalman          // 使用卡尔曼滤波
+
+#ifdef MPU_DMP
+#include "inv_mpu.h"
+#include "inv_mpu_dmp_motion_driver.h"
+#endif
 /*************************驱动方式选择*********************************/
 #define MPU6050_SoftWare_IIC
 //#define MPU6050_HardWare_IIC
@@ -10,8 +17,8 @@
 #ifdef MPU6050_SoftWare_IIC
 #define MPU_SCL_Port GPIOB 
 #define MPU_SDA_Port GPIOB
-#define MPU_SCL_Pin  GPIO_PIN_9 
-#define MPU_SDA_Pin  GPIO_PIN_8 
+#define MPU_SCL_Pin  GPIO_PIN_8 
+#define MPU_SDA_Pin  GPIO_PIN_9
 #endif
 /************************** 寄存器定义 ********************************/
 // #define MPU_ACCEL_OFFS_REG		0X06	    //accel_offs寄存器,可读取版本号,寄存器手册未提到
@@ -95,16 +102,21 @@
 // #define MPU_READ    0XD1
 // #define MPU_WRITE   0XD0
 /***********************************函数定义************************************/
-uint8_t _MPU_Init(void);                                                      // 初始化MPU6050
+uint8_t MPU_Init(void);                                                      
 
-uint8_t _MPU_Set_Gyro_Fsr(uint8_t fsr);
-uint8_t _MPU_Set_Accel_Fsr(uint8_t fsr);
-uint8_t _MPU_Set_LPF(uint16_t lpf);
-uint8_t _MPU_Set_Rate(uint16_t rate);
-uint8_t _MPU_Set_Fifo(uint8_t sens);
+uint8_t MPU_Set_Gyro_Fsr(uint8_t fsr);
+uint8_t MPU_Set_Accel_Fsr(uint8_t fsr);
+uint8_t MPU_Set_LPF(uint16_t lpf);
+uint8_t MPU_Set_Rate(uint16_t rate);
+uint8_t MPU_Set_Fifo(uint8_t sens);
 
-short _MPU_Get_Temperature(void);
-uint8_t _MPU_Get_Gyroscope(short *gx, short *gy, short *gz);
-uint8_t _MPU_Get_Accelerometer(short *ax, short *ay, short *az);
+short MPU_Get_Temperature(void);
+uint8_t MPU_Get_Gyroscope(short *gx, short *gy, short *gz);
+uint8_t MPU_Get_Accelerometer(short *ax, short *ay, short *az);
+/********************************辅助函数，用户不使用**************************************/
+uint8_t MPU_Write_Len(uint8_t addr, uint8_t reg, uint8_t len, uint8_t *buf);
+uint8_t MPU_Read_Len(uint8_t addr, uint8_t reg, uint8_t len, uint8_t *buf);
+void _IIC_GPIO_Init(void);
+
 
 #endif

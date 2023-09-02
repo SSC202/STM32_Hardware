@@ -49,10 +49,10 @@
 // #include "msp430_clock.h"
 // #include "msp430_interrupt.h"
 
-#define i2c_write   _MPU_Write_Len
-#define i2c_read    _MPU_Read_Len
-//#define delay_ms    delay_ms
-#define get_ms      mget_ms
+#define i2c_write MPU_Write_Len
+#define i2c_read  MPU_Read_Len
+#define delay_ms  HAL_Delay
+#define get_ms    mget_ms
 /*
 static inline int reg_int_cb(struct int_param_s *int_param)
 {
@@ -2850,10 +2850,7 @@ lp_int_restore:
     return 0;
 }
 
-
-
-
-#define q30 1073741824.0f                               // q30格式,long转float时的除数.
+#define q30 1073741824.0f // q30格式,long转float时的除数.
 
 // 陀螺仪方向设置
 static signed char gyro_orientation[9] = {1, 0, 0,
@@ -2861,7 +2858,7 @@ static signed char gyro_orientation[9] = {1, 0, 0,
                                           0, 0, 1};
 /**
  * @brief   MPU自检函数
-*/
+ */
 uint8_t run_self_test(void)
 {
     int result;
@@ -2890,10 +2887,9 @@ uint8_t run_self_test(void)
         return 1;
 }
 
-
 /**
  * @brief   陀螺仪方向控制
-*/
+ */
 unsigned short inv_orientation_matrix_to_scalar(
     const signed char *mtx)
 {
@@ -2941,20 +2937,20 @@ void mget_ms(unsigned long *time)
 
 /**
  * @brief   DMP初始化函数
-*/
+ */
 uint8_t mpu_dmp_init(void)
 {
     uint8_t res = 0;
-    MPU_IIC_Init();                                             // 初始化IIC总线
-    if (mpu_init() == 0)                                        // 初始化MPU6050
+    _IIC_GPIO_Init();    // 初始化IIC总线
+    if (mpu_init() == 0) // 初始化MPU6050
     {
-        res = mpu_set_sensors(INV_XYZ_GYRO | INV_XYZ_ACCEL);    // 设置所需要的传感器
+        res = mpu_set_sensors(INV_XYZ_GYRO | INV_XYZ_ACCEL); // 设置所需要的传感器
         if (res) return 1;
         res = mpu_configure_fifo(INV_XYZ_GYRO | INV_XYZ_ACCEL); // 设置FIFO
         if (res) return 2;
-        res = mpu_set_sample_rate(DEFAULT_MPU_HZ);              // 设置采样率
+        res = mpu_set_sample_rate(DEFAULT_MPU_HZ); // 设置采样率
         if (res) return 3;
-        res = dmp_load_motion_driver_firmware();                // 加载dmp固件
+        res = dmp_load_motion_driver_firmware(); // 加载dmp固件
         if (res) return 4;
         res = dmp_set_orientation(inv_orientation_matrix_to_scalar(gyro_orientation)); // 设置陀螺仪方向
         if (res) return 5;
@@ -2979,7 +2975,7 @@ uint8_t mpu_dmp_init(void)
  * @param       pitch    俯仰角 精度:0.1°   范围:-90.0° <---> +90.0°
  * @param       roll     横滚角 精度:0.1°   范围:-180.0°<---> +180.0°
  * @param       yaw      航向角 精度:0.1°   范围:-180.0°<---> +180.0°
-*/
+ */
 uint8_t mpu_dmp_get_data(float *pitch, float *roll, float *yaw)
 {
     float q0 = 1.0f, q1 = 0.0f, q2 = 0.0f, q3 = 0.0f;
