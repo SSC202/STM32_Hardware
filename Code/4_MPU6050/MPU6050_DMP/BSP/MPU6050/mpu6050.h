@@ -1,23 +1,41 @@
 #ifndef __MPU6050_H
 #define __MPU6050_H
 
-
 /************************ 数据处理方式选择 *****************************/
-#define MPU_DMP             // 使用DMP库 
-#define MPU_Kalman          // 使用卡尔曼滤波
+#define MPU_DMP // 使用DMP库
+// #define MPU_Kalman // 使用卡尔曼滤波
 
 #ifdef MPU_DMP
 #include "inv_mpu.h"
 #include "inv_mpu_dmp_motion_driver.h"
+
+typedef struct
+{
+    float pitch;
+    float roll;
+    float yaw;
+    float accel_x;
+    float accel_y;
+    float accel_z;
+    float gyro_x;
+    float gyro_y;
+    float gyro_z;
+    float tempreture;
+} IMU_Data_t;
+
+extern IMU_Data_t mpu_data;
+#endif
+#ifdef MPU_Kalman
+#include "kalman.h"
 #endif
 /*************************驱动方式选择*********************************/
-#define MPU6050_SoftWare_IIC
-//#define MPU6050_HardWare_IIC
+// #define MPU6050_SoftWare_IIC
+#define MPU6050_HardWare_IIC
 /************************** 端口定义 **********************************/
 #ifdef MPU6050_SoftWare_IIC
-#define MPU_SCL_Port GPIOB 
+#define MPU_SCL_Port GPIOB
 #define MPU_SDA_Port GPIOB
-#define MPU_SCL_Pin  GPIO_PIN_8 
+#define MPU_SCL_Pin  GPIO_PIN_8
 #define MPU_SDA_Pin  GPIO_PIN_9
 #endif
 /************************** 寄存器定义 ********************************/
@@ -102,21 +120,19 @@
 // #define MPU_READ    0XD1
 // #define MPU_WRITE   0XD0
 /***********************************函数定义************************************/
-uint8_t MPU_Init(void);                                                      
+uint8_t MPU_Init(void);
+#ifdef MPU_DMP
+void MPU_Data_Get(IMU_Data_t *_imu_data);
+#endif
 
-uint8_t MPU_Set_Gyro_Fsr(uint8_t fsr);
-uint8_t MPU_Set_Accel_Fsr(uint8_t fsr);
-uint8_t MPU_Set_LPF(uint16_t lpf);
-uint8_t MPU_Set_Rate(uint16_t rate);
-uint8_t MPU_Set_Fifo(uint8_t sens);
-
-short MPU_Get_Temperature(void);
-uint8_t MPU_Get_Gyroscope(short *gx, short *gy, short *gz);
-uint8_t MPU_Get_Accelerometer(short *ax, short *ay, short *az);
 /********************************辅助函数，用户不使用**************************************/
 uint8_t MPU_Write_Len(uint8_t addr, uint8_t reg, uint8_t len, uint8_t *buf);
 uint8_t MPU_Read_Len(uint8_t addr, uint8_t reg, uint8_t len, uint8_t *buf);
 void _IIC_GPIO_Init(void);
-
+#ifdef MPU_Kalman
+int8_t MPU_Get_Accelerometer(short *ax, short *ay, short *az);
+int8_t MPU_Get_Gyroscope(short *gx, short *gy, short *gz);
+short MPU_Get_Temperature(void);
+#endif
 
 #endif

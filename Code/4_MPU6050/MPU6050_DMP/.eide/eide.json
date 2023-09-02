@@ -73,7 +73,8 @@
           "Drivers/CMSIS/Device/ST/STM32F1xx/Include",
           "Drivers/CMSIS/Include",
           "BSP",
-          "BSP/MPU6050"
+          "BSP/MPU6050",
+          "BSP/Kalman"
         ],
         "libList": [],
         "sourceDirList": [],

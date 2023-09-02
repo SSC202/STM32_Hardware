@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "i2c.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -57,10 +58,7 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-float _pitch = 0, _roll = 0, _yaw = 0;
-short _aacx, _aacy, _aacz;
-short _gyrox, _gyroy, _gyroz;
-short _temp = 0;
+extern IMU_Data_t mpu_data;
 /* USER CODE END 0 */
 
 /**
@@ -93,6 +91,7 @@ int main(void)
     MX_GPIO_Init();
     MX_TIM4_Init();
     MX_USART1_UART_Init();
+    MX_I2C1_Init();
     /* USER CODE BEGIN 2 */
     MPU_Init();
     printf("init success\r\n");
@@ -104,12 +103,9 @@ int main(void)
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
-        while (mpu_dmp_get_data(&_pitch, &_roll, &_yaw))
-            ;
-        MPU_Get_Accelerometer(&_aacx, &_aacy, &_aacz);
-        MPU_Get_Gyroscope(&_gyrox, &_gyroy, &_gyroz);
-        _temp = MPU_Get_Temperature();
-        printf("%.2f\r\n",_pitch);
+        // 采样并卡尔曼滤波
+        MPU_Data_Get(&mpu_data);
+        printf("%.2f\r\n", mpu_data.pitch);
         HAL_Delay(500);
     }
     /* USER CODE END 3 */
