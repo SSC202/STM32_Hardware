@@ -38,10 +38,10 @@
 #ifdef OLED_HardWare_SPI
 #include "spi.h"
 /* 端口状态定义 */
-#define OLED_DC(x)                                                                                                                        \
-    do {                                                                                                                                  \
+#define OLED_DC(x)             do {                                                                                                                                  \
         (x == 1) ? HAL_GPIO_WritePin(SPI_DC_Port, SPI_DC_Pin, GPIO_PIN_SET) : HAL_GPIO_WritePin(SPI_DC_Port, SPI_DC_Pin, GPIO_PIN_RESET); \
-    } while (0)
+    } while (0)                                                                                                               \
+
 
 #define OLED_CS(x)                                                                                                                        \
     do {                                                                                                                                  \
