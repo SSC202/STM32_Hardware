@@ -193,12 +193,6 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
-/**
- * @brief       ??????
- * @param       a      : ??a
- *              b[3][3]: ??b
- * @retval      ????
- */
 static float *demo_matconv(float *a, float b[3][3])
 {
     float res[3];
@@ -216,14 +210,6 @@ static float *demo_matconv(float *a, float b[3][3])
     return a;
 }
 
-/**
- * @brief       ????
- * @param       point: ???????
- *              x    : X????
- *              y    : Y????
- *              z    : Z????
- * @retval      ????
- */
 static void demo_rotate(float *point, float x, float y, float z)
 {
     float rx[3][3];
@@ -288,7 +274,6 @@ void LCD_Test(void)
 #if (LCD_USING_TOUCH != 0)
         static LCD_touch_point_t point[1];
 
-        /* RGB LCD?????? */
         if (LCD_Touch_Scan(point, sizeof(point) / sizeof(point[0])) == sizeof(point) / sizeof(point[0])) {
             if ((point[0].x > 56) && (point[0].x < (LCD_Get_Width() - 56)) && (point[0].y > 138) && (point[0].y < (LCD_Get_Height() - 56))) {
                 x = point[0].x;
@@ -302,7 +287,6 @@ void LCD_Test(void)
         }
 
         for (line_index = 0; line_index < 24; line_index += 2) {
-            /* RGB LCD??LCD??? */
             LCD_Draw_Line(x + cube[line_id[line_index] - 1][0],
                           y + cube[line_id[line_index] - 1][1],
                           x + cube[line_id[line_index + 1] - 1][0],
