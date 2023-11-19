@@ -26,6 +26,6 @@ int32_t Ring_Buffer_Read_OneByte(Ring_Buffer_t pbuf, uint8_t *ch);
 int32_t Ring_Buffer_Write_OneByte(Ring_Buffer_t pbuf, const uint8_t ch);
 int32_t Ring_Buffer_Peek_OneByte(Ring_Buffer_t pbuf, uint8_t *ch);
 int32_t Ring_Buffer_Read(Ring_Buffer_t pbuf, uint8_t *ch, int16_t length);
-int32_t Ring_Buffer_Write(Ring_Buffer_t pbuf, const uint8_t *ch, int16_t length)
+int32_t Ring_Buffer_Write(Ring_Buffer_t pbuf, const uint8_t *ch, int16_t length);
 
 #endif
