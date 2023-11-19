@@ -8,6 +8,11 @@
 
 #include "stm32f1xx.h"
 #include "usart.h"
+/************************ 用户定义 ***************************/
+#define OPS_UART_HANDLE huart3 // 串口选项
+#define OPS_UART        USART3 // 串口选项
+#define USE_IT          0      // 使能中断选项，使用前先使用一次HAL_UART_Receive_IT()
+#define USE_POLL        0      // 使能轮询选项，需要在线程内轮询调用
 
 /************************ 结构体定义 ***************************/
 
@@ -21,16 +26,13 @@ typedef struct OPS_t {
 } OPS_t;           // OPS数据结构体
 
 extern OPS_t OPS_Data;
-extern uint8_t ops_buffer[28];
 
-/************************ 用户定义 ***************************/
-#define OPS_UART_HANDLE huart3 // 串口选项
-#define OPS_UART        USART3 // 串口选项
-#define USE_IT          0      // 使能中断选项
-#define USE_POLL        1      // 使能轮询选项，需要在线程内轮询调用
-
-#if (USE_POLL == 1)
-uint8_t OPS_Get_Data(void);
+#if (USE_IT == 1)
+extern uint8_t ch[1];
 #endif
 
+
+uint8_t OPS_Decode(void);
+
 #endif
+

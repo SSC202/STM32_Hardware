@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "dma.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -87,10 +88,11 @@ int main(void)
 
     /* Initialize all configured peripherals */
     MX_GPIO_Init();
+    MX_DMA_Init();
     MX_USART1_UART_Init();
     MX_USART3_UART_Init();
     /* USER CODE BEGIN 2 */
-    // HAL_UART_Receive_IT(&huart3, ops_buffer, 28);
+    
     /* USER CODE END 2 */
 
     /* Infinite loop */
@@ -99,10 +101,10 @@ int main(void)
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
-        flag = OPS_Get_Data();
+
         // printf("%d\r\n", flag);
 
-        printf("%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\r\n",OPS_Data.z_angle,OPS_Data.x_angle,OPS_Data.y_angle,OPS_Data.pos_x,OPS_Data.pos_y,OPS_Data.w_z);
+        printf("%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\r\n", OPS_Data.z_angle, OPS_Data.x_angle, OPS_Data.y_angle, OPS_Data.pos_x, OPS_Data.pos_y, OPS_Data.w_z);
         HAL_Delay(1);
     }
     /* USER CODE END 3 */
