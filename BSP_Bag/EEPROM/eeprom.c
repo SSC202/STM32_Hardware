@@ -2,13 +2,13 @@
 
 /****************************************************/
 /* 如果使能FreeRTOS */
-#ifdef USE_FREERTOS
+#if (USE_FREERTOS == 1)
 #include "FreeRTOS.h"
 #include "cmsis_os.h"
 #endif
 
 /* 如果使能软件IIC */
-#ifdef EEPROM_IIC_SoftWare
+#if (EEPROM_IIC_SoftWare == 1)
 #include <inttypes.h>
 #include "gpio.h"
 /* 读写控制定义 */
@@ -28,12 +28,12 @@
 #endif
 
 /* 如果使能硬件IIC */
-#ifdef EEPROM_IIC_HardWare
+#if (EEPROM_IIC_HardWare == 1)
 #include "i2c.h"
 #endif
 /****************************************************/
 /* 如果使能硬件IIC */
-#ifdef EEPROM_IIC_HardWare
+#if (EEPROM_IIC_HardWare == 1)
 /* IIC 基础驱动函数 */
 /**
  * @brief IIC写字节函数
@@ -58,7 +58,7 @@ static HAL_StatusTypeDef EEPROM_IIC_MemRead(uint8_t addr, uint8_t *rev_buf, uint
 }
 #endif
 /* 如果使能软件IIC */
-#ifdef EEPROM_IIC_SoftWare
+#if (EEPROM_IIC_SoftWare == 1)
 /* IIC 基础驱动函数 */
 
 /**
