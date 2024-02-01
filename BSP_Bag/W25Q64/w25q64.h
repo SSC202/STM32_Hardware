@@ -1,13 +1,18 @@
+/**
+ * @brief   W25Q64 STM32驱动库
+ * @attention   使用前，需要选择硬件或者软件SPI，选用硬件SPI将默认使用SPI 1，选用软件SPI后需要自行确定软件SPI对应的引脚
+*/
 #ifndef _W25Q64_H
+#define _W25Q64_H
 
 #include "stm32f1xx.h"
 /*************************驱动方式选择*****************************/
-/* 是否使用软件SPI */
-#define SoftWare_SPI
-/* 是否使用硬件SPI */
-//#define HardWare_SPI
-/* 是否使能FreeRTOS */
-// #define USE_FREERTOS
+
+#define SoftWare_SPI    1   /* 是否使用软件SPI */
+#define HardWare_SPI    0   /* 是否使用硬件SPI */
+#ifndef USE_FREERTOS
+#define USE_FREERTOS    0   /* 是否使能FreeRTOS */
+#endif
 /*************************片选引脚定义*****************************/
 #define W25Q64_CS_Port GPIOA
 #define W25Q64_CS_Pin  GPIO_PIN_4
@@ -37,7 +42,7 @@
 #define W25Q64_PAGE_PROG_CMD            0x02 // 页写入
 #define W25Q64_QUAD_INPUT_PAGE_PROG_CMD 0x32
 /************************* 引脚定义 ********************************/
-#ifdef SoftWare_SPI
+#if (SoftWare_SPI == 1)
 #define W25Q64_DI_Port  GPIOA
 #define W25Q64_DI_Pin   GPIO_PIN_6
 #define W25Q64_DO_Port  GPIOA
@@ -46,11 +51,43 @@
 #define W25Q64_SCL_Pin  GPIO_PIN_5
 #endif
 /************************* 函数声明 ********************************/
+
+/**
+ * @brief ID读取函数
+ * @retval 设备ID（第一个字节为厂商ID，第二个字节为设备ID）
+ */
 uint16_t W25Q64_ReadID(void);
+
+/**
+ * @brief   读取Flash数据函数
+ * @param buffer    读出数据
+ * @param addr      起始读出地址
+ * @param bytes     读出字节数
+ */
 int W25Q64_ReadFlash(uint8_t *buffer, uint32_t addr, uint16_t bytes);
+
+/**
+ * @brief 写使能函数
+ */
 void W25Q64_Write_Enable(void);
+
+/**
+ * @brief 写失能函数
+ */
 void W25Q64_Write_Disable(void);
+
+/**
+ * @brief   页写入函数
+ * @param data  写入数据
+ * @param addr  起始写入地址
+ * @param bytes 写入字节数
+ */
 void W25Q64_Write_Page(uint8_t *data, uint32_t addr, uint16_t bytes);
+
+/**
+ * @brief   扇区擦除函数
+ * @param   sector_addr 擦除的扇区地址
+ */
 void W25Q64_Erase_Sector(uint32_t sector_addr);
 
 #endif

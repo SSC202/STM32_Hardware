@@ -2,24 +2,19 @@
 
 /****************************************************/
 /* 如果使能FreeRTOS */
-#ifdef USE_FREERTOS
+#if (USE_FREERTOS == 1)
 #include "FreeRTOS.h"
 #include "cmsis_os.h"
 #endif
 
-/* 如果使能软件SPI */
-#ifdef SoftWare_SPI
-
-#endif
-
 /* 如果使能硬件SPI */
-#ifdef HardWare_SPI
+#if (HardWare_SPI == 1)
 #include "spi.h"
 #endif
 /****************************************************/
 /* SPI基础驱动函数 */
 /* 如果使能软件SPI */
-#ifdef SoftWare_SPI
+#if (SoftWare_SPI == 1)
 /* 引脚状态宏定义 */
 #define DO_H()                                                          \
     do {                                                                \
