@@ -2941,7 +2941,7 @@ void mget_ms(unsigned long *time)
 uint8_t mpu_dmp_init(void)
 {
     uint8_t res = 0;
-#ifdef MPU6050_SoftWare_IIC
+#if (MPU6050_SoftWare_IIC == 1)
     _IIC_GPIO_Init(); // 初始化IIC总线
 #endif
     if (mpu_init() == 0) // 初始化MPU6050
