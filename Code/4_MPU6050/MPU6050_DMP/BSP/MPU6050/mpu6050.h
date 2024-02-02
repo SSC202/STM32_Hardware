@@ -1,3 +1,11 @@
+/**
+ * @brief   STM32 MPU6050 驱动库
+ * @attention   本驱动库内含DMP，卡尔曼滤波，Mahony滤波三种算法，用户可选择其中一种，比较推荐Mahony算法进行数据处理
+ *              使用前请选择驱动方式（硬件/软件IIC）
+ *              使用时使用MPU_Init()进行初始化
+ *              在一个循环的程序中定时运行MPU_Data_Get()函数，引出imu_data结构体数据进行数据接收
+ * @author  SSC
+*/
 #ifndef __MPU6050_H
 #define __MPU6050_H
 
@@ -5,10 +13,9 @@
 
 /************************ 数据处理方式选择 *****************************/
 
-#define MPU_DMP            0 // 使用DMP库
-#define MPU_Kalman_Filter  0 // 使用卡尔曼滤波
-#define MPU_Balance_Filter 0 // 使用一阶互补滤波
-#define MPU_Mahony_Filter  1 // 使用Mahony互补滤波（推荐）
+#define MPU_DMP           0 // 使用DMP库
+#define MPU_Kalman_Filter 1 // 使用卡尔曼滤波
+#define MPU_Mahony_Filter 0 // 使用Mahony互补滤波（推荐）
 
 /*************************驱动方式选择*********************************/
 
@@ -28,7 +35,6 @@
 /*********************************************************************/
 
 #if (MPU_Mahony_Filter == 1)
-
 #define Kp    100.0f  // 比例增益支配率收敛到加速度计/磁强计
 #define Ki    0.002f  // 积分增益支配率的陀螺仪偏见的衔接
 #define halfT 0.0005f // 采样周期的一半
@@ -41,7 +47,7 @@
 #include "inv_mpu.h"
 #include "inv_mpu_dmp_motion_driver.h"
 #endif
-#if (MPU_Mahony_Filter == 1)
+#if (MPU_Mahony_Filter == 1 || MPU_Kalman_Filter == 1)
 #include "math.h"
 #endif
 

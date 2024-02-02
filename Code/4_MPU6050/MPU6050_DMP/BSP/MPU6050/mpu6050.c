@@ -1,4 +1,3 @@
-#include "stm32f1xx_hal.h"
 #include "mpu6050.h"
 /*******************宏定义部分*************************/
 /* 如果使能软件IIC */
@@ -383,11 +382,22 @@ static uint8_t MPU_Read_Byte(uint8_t reg)
 #endif
 
 /***********************驱动函数**************************/
-#if (MPU_Mahony_Filter == 1 || MPU_DMP == 1)
+#if (MPU_Mahony_Filter == 1 || MPU_DMP == 1 || MPU_Kalman_Filter == 1)
 const float k_gyro[4] = {0.00133125, 0.0026625, 0.005325, 0.001065};          // 陀螺仪单位转换
 const float k_accr[4] = {0.000598163, 0.001196326, 0.002392652, 0.004785304}; // 加速度计单位转换
 float k_g;
 float k_a;
+#endif
+#if (MPU_Kalman_Filter == 1)
+float timer;                         // 计时器
+float rad2deg = 57.29578;            // 弧度到角度的换算系数
+float roll_v = 0, pitch_v = 0;       // 换算到x,y轴上的角速度
+float e_P[2][2] = {{1, 0}, {0, 1}};  // 误差协方差矩阵
+float k_k[2][2] = {{0, 0}, {0, 0}};  // 卡尔曼增益
+float gyro_roll = 0, gyro_pitch = 0; // 陀螺仪积分计算出的角度，先验状态
+float acc_roll = 0, acc_pitch = 0;   // 加速度计观测出的角度，观测状态
+float k_roll = 0, k_pitch = 0;       // 卡尔曼滤波后估计出最优角度，最优估计状态
+
 #endif
 
 /**
@@ -514,7 +524,7 @@ uint8_t MPU_Init(void)
     MPU_Write_Byte(MPU_PWR_MGMT1_REG, 0X00); // 唤醒MPU6050
     MPU_Set_Gyro_Fsr(3);                     // 陀螺仪传感器,±2000dps
     MPU_Set_Accel_Fsr(0);                    // 加速度传感器,±2g
-#if (MPU_Mahony_Filter == 1 || MPU_DMP == 1)
+#if (MPU_Mahony_Filter == 1 || MPU_DMP == 1 || MPU_Kalman_Filter == 1)
     k_g = k_gyro[3];
     k_a = k_accr[0];
 #endif
@@ -635,5 +645,51 @@ void MPU_Data_Get(void)
     imu_data.roll       = atan2(2 * imu_data.q2 * imu_data.q3 + 2 * imu_data.q0 * imu_data.q1, -2 * imu_data.q1 * imu_data.q1 - 2 * imu_data.q2 * imu_data.q2 + 1) * 57.3;
     imu_data.yaw        = atan2(2 * (imu_data.q1 * imu_data.q2 + imu_data.q0 * imu_data.q3), imu_data.q0 * imu_data.q0 + imu_data.q1 * imu_data.q1 - imu_data.q2 * imu_data.q2 - imu_data.q3 * imu_data.q3) * 57.3;
     imu_data.tempreture = (float)MPU_Get_Temperature();
+#endif
+#if (MPU_Kalman_Filter == 1)
+    // 获取时间间隔
+    float dt = (double)(HAL_GetTick() - timer) / 1000;
+    timer    = HAL_GetTick();
+    // 数据读取并进行单位转换
+    short accx, accy, accz;
+    short gyrox, gyroy, gyroz;
+    MPU_Get_Accelerometer(&accx, &accy, &accz);
+    MPU_Get_Gyroscope(&gyrox, &gyroy, &gyroz);
+    imu_data.gyro_x  = gyrox * k_g;
+    imu_data.gyro_y  = gyroy * k_g;
+    imu_data.gyro_z  = gyroz * k_g;
+    imu_data.accel_x = accx * k_a;
+    imu_data.accel_y = accy * k_a;
+    imu_data.accel_z = accz * k_a;
+    // 计算先验估计值
+    roll_v     = (imu_data.gyro_x) + ((sin(k_pitch) * sin(k_roll)) / cos(k_pitch)) * (imu_data.gyro_y) + ((sin(k_pitch) * cos(k_roll)) / cos(k_pitch)) * imu_data.gyro_z; // roll轴的角速度
+    pitch_v    = cos(k_roll) * (imu_data.gyro_y) - sin(k_roll) * imu_data.gyro_z;                                                                                         // pitch轴的角速度
+    gyro_roll  = k_roll + dt * roll_v;                                                                                                                                    // 先验roll角度
+    gyro_pitch = k_pitch + dt * pitch_v;
+    // 误差更新
+    e_P[0][0] = e_P[0][0] + 0.0025;
+    e_P[0][1] = e_P[0][1] + 0;
+    e_P[1][0] = e_P[1][0] + 0;
+    e_P[1][1] = e_P[1][1] + 0.0025;
+    // 计算卡尔曼增益
+    k_k[0][0] = e_P[0][0] / (e_P[0][0] + 0.3);
+    k_k[0][1] = 0;
+    k_k[1][0] = 0;
+    k_k[1][1] = e_P[1][1] / (e_P[1][1] + 0.3);
+    // 计算最优估计
+    acc_roll  = atan((imu_data.accel_y) / (imu_data.accel_z));
+    acc_pitch = -1 * atan(imu_data.accel_x) / sqrt(imu_data.accel_y * imu_data.accel_y + imu_data.accel_z * imu_data.accel_z);
+    k_roll    = gyro_roll + k_k[0][0] * (acc_roll - gyro_roll);
+    k_pitch   = gyro_pitch + k_k[1][1] * (acc_pitch - gyro_pitch);
+    // 协方差矩阵更新
+    e_P[0][0] = (1 - k_k[0][0]) * e_P[0][0];
+    e_P[0][1] = 0;
+    e_P[1][0] = 0;
+    e_P[1][1] = (1 - k_k[1][1]) * e_P[1][1];
+    // 数据处理
+    imu_data.yaw        = 0;
+    imu_data.tempreture = (float)MPU_Get_Temperature();
+    imu_data.pitch      = k_pitch * rad2deg;
+    imu_data.roll       = k_roll * rad2deg;
 #endif
 }
