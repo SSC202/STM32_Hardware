@@ -58,7 +58,7 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-extern IMU_Data_t mpu_data;
+
 /* USER CODE END 0 */
 
 /**
@@ -103,10 +103,9 @@ int main(void)
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
-        // 采样并卡尔曼滤波
-        MPU_Data_Get(&mpu_data);
-        printf("%.2f\r\n", mpu_data.pitch);
-        HAL_Delay(500);
+        MPU_Data_Get();
+        printf("%.2f\r\n", imu_data.pitch);
+        HAL_Delay(5);
     }
     /* USER CODE END 3 */
 }

@@ -1,43 +1,50 @@
 #ifndef __MPU6050_H
 #define __MPU6050_H
 
+#include "stm32f1xx.h"
+
 /************************ 数据处理方式选择 *****************************/
-#define MPU_DMP // 使用DMP库
-// #define MPU_Kalman // 使用卡尔曼滤波
 
-#ifdef MPU_DMP
-#include "inv_mpu.h"
-#include "inv_mpu_dmp_motion_driver.h"
+#define MPU_DMP            0 // 使用DMP库
+#define MPU_Kalman_Filter  0 // 使用卡尔曼滤波
+#define MPU_Balance_Filter 0 // 使用一阶互补滤波
+#define MPU_Mahony_Filter  1 // 使用Mahony互补滤波（推荐）
 
-typedef struct
-{
-    float pitch;
-    float roll;
-    float yaw;
-    float accel_x;
-    float accel_y;
-    float accel_z;
-    float gyro_x;
-    float gyro_y;
-    float gyro_z;
-    float tempreture;
-} IMU_Data_t;
-
-extern IMU_Data_t mpu_data;
-#endif
-#ifdef MPU_Kalman
-#include "kalman.h"
-#endif
 /*************************驱动方式选择*********************************/
-// #define MPU6050_SoftWare_IIC
-#define MPU6050_HardWare_IIC
+
+#define MPU6050_SoftWare_IIC 0 // 使用软件IIC
+#define MPU6050_HardWare_IIC 1 // 使用硬件IIC
 /************************** 端口定义 **********************************/
-#ifdef MPU6050_SoftWare_IIC
+
+#if (MPU6050_SoftWare_IIC == 1)
+
 #define MPU_SCL_Port GPIOB
 #define MPU_SDA_Port GPIOB
 #define MPU_SCL_Pin  GPIO_PIN_8
 #define MPU_SDA_Pin  GPIO_PIN_9
+
 #endif
+
+/*********************************************************************/
+
+#if (MPU_Mahony_Filter == 1)
+
+#define Kp    100.0f  // 比例增益支配率收敛到加速度计/磁强计
+#define Ki    0.002f  // 积分增益支配率的陀螺仪偏见的衔接
+#define halfT 0.0005f // 采样周期的一半
+
+#endif
+
+/*********************************************************************/
+
+#if (MPU_DMP == 1)
+#include "inv_mpu.h"
+#include "inv_mpu_dmp_motion_driver.h"
+#endif
+#if (MPU_Mahony_Filter == 1)
+#include "math.h"
+#endif
+
 /************************** 寄存器定义 ********************************/
 // #define MPU_ACCEL_OFFS_REG		0X06	    //accel_offs寄存器,可读取版本号,寄存器手册未提到
 // #define MPU_PROD_ID_REG			0X0C	    //prod id寄存器,在寄存器手册未提到
@@ -119,20 +126,36 @@ extern IMU_Data_t mpu_data;
  */
 // #define MPU_READ    0XD1
 // #define MPU_WRITE   0XD0
-/***********************************函数定义************************************/
-uint8_t MPU_Init(void);
-#ifdef MPU_DMP
-void MPU_Data_Get(IMU_Data_t *_imu_data);
+/******************************************************************************/
+typedef struct
+{
+    float pitch; // 三轴航向角
+    float roll;
+    float yaw;
+    float accel_x; // 三轴加速度
+    float accel_y;
+    float accel_z;
+    float gyro_x; // 三轴角速度
+    float gyro_y;
+    float gyro_z;
+    float tempreture; // 温度（摄氏度）
+#if (MPU_Mahony_Filter == 1)
+    float q0, q1, q2, q3; // 四元数
+    float exInt, eyInt, ezInt;
 #endif
+} IMU_Data; // IMU数据结构定义
 
-/********************************辅助函数，用户不使用**************************************/
+extern IMU_Data imu_data; // 用户读取数据函数
+
+/**************************辅助函数，用户不使用**********************************/
+
 uint8_t MPU_Write_Len(uint8_t addr, uint8_t reg, uint8_t len, uint8_t *buf);
 uint8_t MPU_Read_Len(uint8_t addr, uint8_t reg, uint8_t len, uint8_t *buf);
 void _IIC_GPIO_Init(void);
-#ifdef MPU_Kalman
-int8_t MPU_Get_Accelerometer(short *ax, short *ay, short *az);
-int8_t MPU_Get_Gyroscope(short *gx, short *gy, short *gz);
-short MPU_Get_Temperature(void);
-#endif
+
+/***********************************函数定义************************************/
+
+uint8_t MPU_Init(void);
+void MPU_Data_Get(void);
 
 #endif
