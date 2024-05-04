@@ -12,6 +12,6 @@ void StartDefaultTask(void *argument)
     AS69_RemoteControl_Init();
     for (;;) {
         JoystickSwitchLED(255, 0, 0, 0.5, 100, &mav_led_msg);
-        osDelay(10);
+        osDelay(2);
     }
 }
