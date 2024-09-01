@@ -3,7 +3,6 @@
   "type": "ARM",
   "dependenceList": [],
   "srcDirs": [
-    ".eide/deps",
     "Core",
     "Drivers",
     "BSP"
@@ -66,7 +65,6 @@
       "custom_dep": {
         "name": "default",
         "incList": [
-          ".eide/deps",
           "Core/Inc",
           "Drivers/STM32F1xx_HAL_Driver/Inc",
           "Drivers/STM32F1xx_HAL_Driver/Inc/Legacy",
@@ -75,7 +73,6 @@
           "BSP"
         ],
         "libList": [],
-        "sourceDirList": [],
         "defineList": [
           "USE_HAL_DRIVER",
           "STM32F103xE"
@@ -83,5 +80,5 @@
       }
     }
   },
-  "version": "3.3"
+  "version": "3.4"
 }
