@@ -361,7 +361,7 @@ uint8_t MPU_Read_Len(uint8_t addr, uint8_t reg, uint8_t len, uint8_t *buf)
  */
 static uint8_t MPU_Write_Byte(uint8_t reg, uint8_t data)
 {
-    uint8_t ret = HAL_I2C_Mem_Read(&hi2c1, MPU_READ, reg, I2C_MEMADD_SIZE_8BIT, &data, 1, 0xFFFF);
+    uint8_t ret = HAL_I2C_Mem_Read(&hi2c1, MPU_WRITE, reg, I2C_MEMADD_SIZE_8BIT, &data, 1, 0xFFFF);
     if (ret == HAL_OK) {
         return 0;
     } else {
